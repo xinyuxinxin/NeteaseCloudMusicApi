@@ -50,7 +50,7 @@ const createRequest = (method, url, data, options) => {
     if (url.includes('music.163.com'))
       headers['Referer'] = 'https://music.163.com'
     if (options.realIP) headers['X-Real-IP'] = options.realIP
-    // headers['X-Real-IP'] = '118.88.88.88'
+      headers['X-Real-IP'] = '118.88.88.88'
     if (typeof options.cookie === 'object')
       headers['Cookie'] = Object.keys(options.cookie)
         .map(
@@ -127,7 +127,7 @@ const createRequest = (method, url, data, options) => {
         settings.httpAgent = new PacProxyAgent(options.proxy)
         settings.httpsAgent = new PacProxyAgent(options.proxy)
       } else {
-        var purl = qs.parse(options.proxy)
+        const purl = qs.parse(options.proxy)
         if (purl.hostname) {
           const agent = tunnel.httpsOverHttp({
             proxy: {
@@ -172,13 +172,19 @@ const createRequest = (method, url, data, options) => {
           }
         } catch (e) {
           // console.log(e)
-          answer.body = body
+          try {
+            answer.body = JSON.parse(body.toString())
+          } catch (err) {
+            // console.log(err)
+            // can't decrypt and can't parse directly
+            answer.body = body
+          }
           answer.status = res.status
         }
 
         answer.status =
           100 < answer.status && answer.status < 600 ? answer.status : 400
-        if (answer.status == 200) resolve(answer)
+        if (answer.status === 200) resolve(answer)
         else reject(answer)
       })
       .catch((err) => {
